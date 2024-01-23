@@ -92,6 +92,8 @@ class UserController extends Controller
                 'alamat' => $validatedData['alamat'],
                 'tanggal_lahir' => $validatedData['tanggal_lahir'],
                 'jurusan' => $validatedData['jurusan'],
+                'foto' => null,
+                'idBerkas' => null
             ]);
 
             // Redirect atau berikan respons sesuai kebutuhan
@@ -137,35 +139,42 @@ class UserController extends Controller
 
     public function _UploadLampiran(Request $request)
     {
+        $user = Auth::user();
+        $data = [];
         try {
             $tipe_pendaftaran = $request->jalur_pendaftaran;
 
-            switch ($tipe_pendaftaran) {
-                case 'Mandiri':
-                    $request->validate([
-                        'raport' => 'required|image|mimes:jpeg|max:1024',
-                    ]);
-                    break;
+            $validations = [
+                'Mandiri' => ['raport'],
+                'Prestasi' => ['raport', 'prestasi'],
+                'Kip' => ['raport', 'kip'],
+            ];
 
-                case 'Prestasi':
-                    $request->validate([
-                        'raport' => 'required|image|mimes:jpeg|max:1024',
-                        'prestasi' => 'required|image|mimes:jpeg|max:1024',
-                    ]);
-                    break;
-
-                case 'Kip':
-                    $request->validate([
-                        'raport' => 'required|image|mimes:jpeg|max:1024',
-                        'kip' => 'required|image|mimes:jpeg|max:1024',
-                    ]);
-                    break;
-
-                default:
-                    return response(['error' => 'Jalur Pendaftaran tidak valid'], 400);
+            if (!isset($validations[$tipe_pendaftaran])) {
+                return response(['error' => 'Jalur Pendaftaran tidak valid'], 400);
             }
 
-            return ['Jalur' => $tipe_pendaftaran, 'data' => 'Validasi berhasil'];
+            $rules = [];
+            foreach ($validations[$tipe_pendaftaran] as $field) {
+                $rules[$field] = 'required|image|mimes:jpeg|max:1024';
+            }
+
+            $request->validate($rules);
+
+            $idFolder = uniqid() . $user->nisn;
+            foreach ($validations[$tipe_pendaftaran] as $field) {
+                $fileName = uniqid() . '.' . $request->file($field)->getClientOriginalExtension();
+                $data[$field] = $fileName;
+                $request->file($field)->move(public_path("data/documents/{$tipe_pendaftaran}/{$idFolder}"), $fileName);
+            }
+            DataPelajar::where('nisn', $user->nisn)->update([
+                'idBerkas' => $idFolder,
+            ]);
+
+            return redirect()->back()->with([
+                'success' => true,
+                'message' => 'Data Berhasil Di Upload'
+            ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response(['error' => $e->errors()], 422);
         } catch (\Exception $e) {

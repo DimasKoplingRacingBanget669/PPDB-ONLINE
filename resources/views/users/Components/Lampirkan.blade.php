@@ -174,6 +174,7 @@
                     <div class="col-md-5 col-lg-4 order-md-last">
                     </div>
                 </div>
+                @if ($dataPelajar['idBerkas'] == null)
                 <main>
                     <p class="fs-5 col-md-8">Hai {{ $dataPelajar['nama'] }} tolong lampirkan berkas yang di perlukan
                         untuk menyelesaikan pendaftaran anda.</p>
@@ -190,12 +191,13 @@
                     </div>
 
                     <div id="Results">
-
                     </div>
 
                     <hr class="col-3 col-md-2 mb-5">
                 </main>
-
+                @else
+                    <p>id Folder anda adalah : {{$dataPelajar['idBerkas']}}</p>
+                @endif
             </main>
         </div>
     </div>
@@ -218,14 +220,14 @@
                     <div class="row g-5">
                         <div class="col-md-6">
                             <h4>Anda Memilih Jalur Pendaftaran: ${JalurPendaptaran}</h4>
-                            <form id="${JalurPendaptaran}Form" enctype="multipart/form-data">
+                            <form action="{{ route('Upload-Lampiran') }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 <div class="mb-3">
-                                    <label for="RaportScan" class="form-label">Unggah Foto Raport Anda (Format: JPEG, Maksimal 1024 KB)</label>
-                                    <input type="file" class="form-control" id="RaportScan" accept="image/jpeg" required>
+                                    <label for="raport" class="form-label">Unggah Foto Raport Anda (Format: JPEG, Maksimal 1024 KB)</label>
+                                    <input type="file" class="form-control" id="raport" name="raport" accept="image/jpeg" required>
                                 </div>
                                 <input type="hidden" name="jalur_pendaftaran" value="${JalurPendaptaran}">
-                                <button type="button" class="btn btn-primary" onclick="validateAndSubmit('${JalurPendaptaran}Form')">Unggah</button>
+                                <button type="submit" class="btn btn-primary">Unggah</button>
                             </form>
                         </div>
                         <div class="p-5 rounded mt-3">
@@ -240,16 +242,16 @@
                     <div class="row g-5">
                         <div class="col-md-6">
                             <h4>Anda Memilih Jalur Pendaftaran: ${JalurPendaptaran}</h4>
-                            <form id="${JalurPendaptaran}Form" enctype="multipart/form-data">
+                            <form action="{{ route('Upload-Lampiran') }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 <div class="mb-3">
-                                    <label for="RaportScan" class="form-label">Unggah Foto Raport Anda (Format: JPEG, Maksimal 1024 KB)</label>
-                                    <input type="file" class="form-control" id="RaportScan" accept="image/jpeg" required>
-                                    <label for="PrestasiScan" class="form-label">Unggah Foto Prestasi Tertinggi Anda (Format: JPEG, Maksimal 1024 KB)</label>
-                                    <input type="file" class="form-control" id="PrestasiScan" accept="image/jpeg" required>
+                                    <label for="raport" class="form-label">Unggah Foto Raport Anda (Format: JPEG, Maksimal 1024 KB)</label>
+                                    <input type="file" class="form-control" id="raport" name="raport" accept="image/jpeg" required>
+                                    <label for="prestasi" class="form-label">Unggah Foto Prestasi Tertinggi Anda (Format: JPEG, Maksimal 1024 KB)</label>
+                                    <input type="file" class="form-control" id="prestasi" name="prestasi" accept="image/jpeg" required>
                                 </div>
                                 <input type="hidden" name="jalur_pendaftaran" value="${JalurPendaptaran}">
-                                <button type="button" class="btn btn-primary" onclick="validateAndSubmit('${JalurPendaptaran}Form')">Unggah</button>
+                                <button type="submit" class="btn btn-primary">Unggah</button>
                             </form>
                         </div>
                         <div class="p-5 rounded mt-3">
@@ -264,16 +266,16 @@
                     <div class="row g-5">
                         <div class="col-md-6">
                             <h4>Anda Memilih Jalur Pendaftaran: ${JalurPendaptaran}</h4>
-                            <form id="${JalurPendaptaran}Form" enctype="multipart/form-data">
+                            <form action="{{ route('Upload-Lampiran') }}" method="POST" enctype="multipart/form-data">
                                 @csrf
                                 <div class="mb-3">
-                                    <label for="RaportScan" class="form-label">Unggah Foto Raport Anda (Format: JPEG, Maksimal 1024 KB)</label>
-                                    <input type="file" class="form-control" id="RaportScan" accept="image/jpeg" required>
-                                    <label for="KipScan" class="form-label">Unggah Foto Kip Anda (Format: JPEG, Maksimal 1024 KB)</label>
-                                    <input type="file" class="form-control" id="KipScan" accept="image/jpeg" required>
+                                    <label for="raport" class="form-label">Unggah Foto Raport Anda (Format: JPEG, Maksimal 1024 KB)</label>
+                                    <input type="file" class="form-control" id="raport" name="raport" accept="image/jpeg" required>
+                                    <label for="kip" class="form-label">Unggah Foto Kip Anda (Format: JPEG, Maksimal 1024 KB)</label>
+                                    <input type="file" class="form-control" id="kip" name="kip" accept="image/jpeg" required>
                                 </div>
                                 <input type="hidden" name="jalur_pendaftaran" value="${JalurPendaptaran}">
-                                <button type="button" class="btn btn-primary" onclick="validateAndSubmit('${JalurPendaptaran}Form')">Unggah</button>
+                                <button type="submit" class="btn btn-primary">Unggah</button>
                             </form>
                         </div>
                         <div class="p-5 rounded mt-3">
@@ -286,19 +288,6 @@
                 }
             });
         });
-
-        function validateAndSubmit(formId) {
-            var uploadForm = document.getElementById(formId);
-            var formData = new FormData(uploadForm);
-
-            fetch('{{ route('Upload-Lampiran') }}', {
-                    method: 'POST',
-                    body: formData,
-                })
-                .then(response => response.json())
-                .then(data => console.log(data))
-                .catch(error => console.error('Error:', error));
-        }
     </script>
 
 </body>
